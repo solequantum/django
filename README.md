@@ -91,7 +91,7 @@ A comprehensive Django REST API application for managing users with full CRUD op
 
 The application connects to MySQL database with the following default settings:
 
-- **Server**: 166.62.40.217
+- **Server**: localhost
 - **Database**: test
 - **Table**: t_users
 - **Username**: t_db_usr27
