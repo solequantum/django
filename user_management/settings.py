@@ -102,11 +102,15 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',  # Full Unicode support including emojis
+            'connect_timeout': 10,  # Connection timeout in seconds
+            'read_timeout': 30,     # Read timeout in seconds
+            'write_timeout': 30,    # Write timeout in seconds
         },
         'POOL_OPTIONS': {
-            'POOL_SIZE': 10,           # Base number of connections in pool
+            'POOL_SIZE': 5,            # Base number of connections in pool
             'MAX_OVERFLOW': 10,        # Additional connections if pool exhausted
-            'RECYCLE': 24 * 60 * 60,   # Recycle connections after 24 hours
+            'RECYCLE': 60,             # Recycle connections after 60 seconds (prevents timeout)
+            'PRE_PING': True,          # Check connection health before using
         }
     }
 }
