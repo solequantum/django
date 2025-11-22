@@ -12,6 +12,10 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
 
@@ -66,26 +70,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'user_management.wsgi.application'
 
-# Database
-# MySQL with connection pooling
-DATABASES = {
-    'default': {
-        'ENGINE': 'dj_db_conn_pool.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'test'),
-        'USER': os.getenv('DB_USER', 't_db_usr27'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'b27!dKNm'),
-        'HOST': os.getenv('DB_HOST', '166.62.40.217'),
-        'PORT': os.getenv('DB_PORT', '3306'),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
-        'POOL_OPTIONS': {
-            'POOL_SIZE': 10,
-            'MAX_OVERFLOW': 10,
-            'RECYCLE': 24 * 60 * 60,
+# Database Configuration
+# Supports both SQLite (for development) and MySQL (for production)
+# Set DB_ENGINE=sqlite in .env to use SQLite for local development
+DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite')  # Options: 'sqlite' or 'mysql'
+
+if DB_ENGINE == 'mysql':
+    # MySQL with connection pooling (requires MySQL 8.0+)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'dj_db_conn_pool.backends.mysql',
+            'NAME': os.getenv('DB_NAME', 'test'),
+            'USER': os.getenv('DB_USER', 't_db_usr27'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'b27!dKNm'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '3306'),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+            },
+            'POOL_OPTIONS': {
+                'POOL_SIZE': 10,
+                'MAX_OVERFLOW': 10,
+                'RECYCLE': 24 * 60 * 60,
+            }
         }
     }
-}
+else:
+    # SQLite for local development (no MySQL required)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
