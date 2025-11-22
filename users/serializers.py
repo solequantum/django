@@ -20,7 +20,6 @@ class TUserSerializer(serializers.ModelSerializer):
             'email',
             'name',
             'phone',
-            'address',
             'is_active',
             'created_at',
             'updated_at'

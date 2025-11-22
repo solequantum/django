@@ -322,11 +322,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="address">Address</label>
-                    <textarea id="address"></textarea>
-                </div>
-
-                <div class="form-group">
                     <label>
                         <input type="checkbox" id="isActive" checked>
                         Active
@@ -451,7 +446,6 @@
                     document.getElementById('email').value = user.email;
                     document.getElementById('name').value = user.name || '';
                     document.getElementById('phone').value = user.phone || '';
-                    document.getElementById('address').value = user.address || '';
                     document.getElementById('isActive').checked = user.is_active;
                     document.getElementById('userModal').classList.add('active');
                 } else {
@@ -475,7 +469,6 @@
                 email: document.getElementById('email').value,
                 name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
                 is_active: document.getElementById('isActive').checked
             };
 
