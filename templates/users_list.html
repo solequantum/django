@@ -312,13 +312,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="firstName">First Name</label>
-                    <input type="text" id="firstName">
-                </div>
-
-                <div class="form-group">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName">
+                    <label for="name">Name</label>
+                    <input type="text" id="name">
                 </div>
 
                 <div class="form-group">
@@ -389,7 +384,7 @@
                     <td>${user.id}</td>
                     <td>${user.username}</td>
                     <td>${user.email}</td>
-                    <td>${user.first_name || ''} ${user.last_name || ''}</td>
+                    <td>${user.name || '-'}</td>
                     <td>${user.phone || '-'}</td>
                     <td>
                         <span class="badge ${user.is_active ? 'badge-active' : 'badge-inactive'}">
@@ -454,8 +449,7 @@
                     document.getElementById('userId').value = user.id;
                     document.getElementById('username').value = user.username;
                     document.getElementById('email').value = user.email;
-                    document.getElementById('firstName').value = user.first_name || '';
-                    document.getElementById('lastName').value = user.last_name || '';
+                    document.getElementById('name').value = user.name || '';
                     document.getElementById('phone').value = user.phone || '';
                     document.getElementById('address').value = user.address || '';
                     document.getElementById('isActive').checked = user.is_active;
@@ -479,8 +473,7 @@
             const userData = {
                 username: document.getElementById('username').value,
                 email: document.getElementById('email').value,
-                first_name: document.getElementById('firstName').value,
-                last_name: document.getElementById('lastName').value,
+                name: document.getElementById('name').value,
                 phone: document.getElementById('phone').value,
                 address: document.getElementById('address').value,
                 is_active: document.getElementById('isActive').checked
