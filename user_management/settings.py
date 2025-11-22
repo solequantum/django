@@ -70,33 +70,80 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'user_management.wsgi.application'
 
-# Database Configuration
-# Supports both SQLite (for development) and MySQL (for production)
-# Set DB_ENGINE=sqlite in .env to use SQLite for local development
+# =============================================================================
+# DATABASE CONFIGURATION
+# =============================================================================
+# This application supports two database backends:
+#
+# 1. SQLite (Default) - For local development
+#    - No installation required
+#    - Data stored in db.sqlite3 file
+#    - Perfect for development and testing
+#
+# 2. MySQL - For production deployment
+#    - Requires MySQL 8.0 or later (Django 4.2 requirement)
+#    - Includes connection pooling for better performance
+#    - Configure via environment variables in .env file
+#
+# To switch between databases, set DB_ENGINE in your .env file:
+#    DB_ENGINE=sqlite   (default, for development)
+#    DB_ENGINE=mysql    (for production with MySQL 8.0+)
+# =============================================================================
+
 DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite')  # Options: 'sqlite' or 'mysql'
 
 if DB_ENGINE == 'mysql':
-    # MySQL with connection pooling (requires MySQL 8.0+)
+    # =========================================================================
+    # MySQL Configuration (Production)
+    # =========================================================================
+    # Requirements:
+    #   - MySQL Server 8.0 or later
+    #   - mysqlclient Python package
+    #   - django-db-connection-pool package
+    #
+    # Environment Variables (.env file):
+    #   DB_ENGINE=mysql
+    #   DB_NAME=your_database_name
+    #   DB_USER=your_database_user
+    #   DB_PASSWORD=your_database_password
+    #   DB_HOST=your_mysql_server_host
+    #   DB_PORT=3306
+    #
+    # Connection Pool Settings:
+    #   POOL_SIZE: Number of connections to keep open (default: 10)
+    #   MAX_OVERFLOW: Extra connections when pool is exhausted (default: 10)
+    #   RECYCLE: Seconds before a connection is recycled (default: 86400 = 24 hours)
+    # =========================================================================
     DATABASES = {
         'default': {
             'ENGINE': 'dj_db_conn_pool.backends.mysql',
             'NAME': os.getenv('DB_NAME', 'test'),
-            'USER': os.getenv('DB_USER', 't_db_usr27'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'b27!dKNm'),
+            'USER': os.getenv('DB_USER', 'db_user'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'db_password'),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '3306'),
             'OPTIONS': {
-                'charset': 'utf8mb4',
+                'charset': 'utf8mb4',  # Full Unicode support including emojis
             },
             'POOL_OPTIONS': {
-                'POOL_SIZE': 10,
-                'MAX_OVERFLOW': 10,
-                'RECYCLE': 24 * 60 * 60,
+                'POOL_SIZE': 10,           # Base number of connections in pool
+                'MAX_OVERFLOW': 10,        # Additional connections if pool exhausted
+                'RECYCLE': 24 * 60 * 60,   # Recycle connections after 24 hours
             }
         }
     }
 else:
-    # SQLite for local development (no MySQL required)
+    # =========================================================================
+    # SQLite Configuration (Development - Default)
+    # =========================================================================
+    # SQLite is used by default for local development because:
+    #   - No database server installation required
+    #   - Zero configuration needed
+    #   - Data stored in a single file (db.sqlite3)
+    #   - Perfect for development, testing, and learning
+    #
+    # Note: For production with high traffic, use MySQL or PostgreSQL
+    # =========================================================================
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

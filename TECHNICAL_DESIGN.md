@@ -13,7 +13,7 @@
 
 ## System Overview
 
-The User Management System is a web-based application that provides RESTful API endpoints for managing user data stored in a MySQL database. The system is built using Django 4.2 framework with Python 3.10 and follows REST architectural principles.
+The User Management System is a web-based application that provides RESTful API endpoints for managing user data. The system is built using Django 4.2 framework with Python 3.10 and follows REST architectural principles. It supports dual database backends: SQLite for development and MySQL 8.0+ for production.
 
 ### Purpose
 To provide a comprehensive user management solution with:
@@ -76,7 +76,7 @@ To provide a comprehensive user management solution with:
 ┌───────────────────────▼─────────────────────────────────────┐
 │                      Data Layer                              │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │    MySQL    │  │    Redis     │  │  File System │       │
+│  │SQLite/MySQL │  │    Redis     │  │  File System │       │
 │  │  (t_users)  │  │  (Celery)    │  │   (Logs)     │       │
 │  └─────────────┘  └──────────────┘  └──────────────┘       │
 └─────────────────────────────────────────────────────────────┘
@@ -102,9 +102,10 @@ For the API, we use **Django REST Framework (DRF)** which adds:
 - **Python 3.10**: Programming language
 
 ### Database
-- **MySQL**: Primary database
-- **django-db-connection-pool**: Connection pooling
-- **mysqlclient**: MySQL database adapter
+- **SQLite**: Default database for development (no setup required)
+- **MySQL 8.0+**: Production database (Django 4.2 requires MySQL 8.0 or later)
+- **django-db-connection-pool**: Connection pooling (MySQL only)
+- **mysqlclient**: MySQL database adapter (MySQL only)
 
 ### Task Scheduling
 - **Celery 5.3**: Distributed task queue
@@ -124,6 +125,24 @@ For the API, we use **Django REST Framework (DRF)** which adds:
 - **Fetch API**: AJAX requests
 
 ## Database Design
+
+### Supported Database Backends
+
+The application supports two database backends configured via the `DB_ENGINE` environment variable:
+
+#### 1. SQLite (Default - Development)
+- **Engine**: `django.db.backends.sqlite3`
+- **File**: `db.sqlite3` in project root
+- **Use Case**: Development, testing, learning
+- **Configuration**: `DB_ENGINE=sqlite` (or omit, as it's the default)
+
+#### 2. MySQL (Production)
+- **Engine**: `dj_db_conn_pool.backends.mysql` (with connection pooling)
+- **Version Required**: MySQL 8.0 or later
+- **Use Case**: Production deployments with high traffic
+- **Configuration**: `DB_ENGINE=mysql` plus database credentials
+
+**Important Note**: Django 4.2 requires MySQL 8.0 or later. MySQL 5.x versions are NOT supported and will cause errors.
 
 ### Database Schema
 

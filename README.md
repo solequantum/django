@@ -1,37 +1,45 @@
 # User Management System
 
-A comprehensive Django REST API application for managing users with full CRUD operations, built with Python 3.10 and MySQL database.
+A comprehensive Django REST API application for managing users with full CRUD operations, built with Python 3.10. Supports both SQLite (development) and MySQL (production) databases.
 
 ## Features
 
-✅ **REST API** - Complete RESTful API with CRUD operations
-✅ **MySQL Database** - Efficient connection pooling mechanism
-✅ **Web Interface** - User-friendly web pages with pagination
-✅ **API Documentation** - Integrated Swagger/OpenAPI documentation
-✅ **Task Scheduling** - Celery-based scheduling (like Quartz in Java)
-✅ **Logging System** - Advanced logging (like Log4J2 in Java)
-✅ **Email Support** - SMTP-based email notifications
-✅ **Admin Panel** - Django admin interface for management
+- **REST API** - Complete RESTful API with CRUD operations
+- **Dual Database Support** - SQLite for development, MySQL for production
+- **Web Interface** - User-friendly web pages with pagination
+- **API Documentation** - Integrated Swagger/OpenAPI documentation
+- **Task Scheduling** - Celery-based scheduling (like Quartz in Java)
+- **Logging System** - Advanced logging (like Log4J2 in Java)
+- **Email Support** - SMTP-based email notifications
+- **Admin Panel** - Django admin interface for management
+- **Docker Support** - Full containerization with Docker Compose
 
 ## Quick Start
 
 ### Prerequisites
 
 - Python 3.10+
-- MySQL Server
-- Redis Server (for Celery)
+- Redis Server (optional, for Celery task scheduling)
+
+**For MySQL (Production only):**
+- MySQL Server 8.0+ (Django 4.2 requires MySQL 8.0 or later)
 
 ### Installation
 
-1. **Clone the repository**
+1. **Navigate to project directory**
    ```bash
    cd /path/to/django
    ```
 
 2. **Create virtual environment**
    ```bash
-   python3.10 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   python -m venv venv
+
+   # On Windows:
+   venv\Scripts\activate
+
+   # On Linux/Mac:
+   source venv/bin/activate
    ```
 
 3. **Install dependencies**
@@ -41,9 +49,13 @@ A comprehensive Django REST API application for managing users with full CRUD op
 
 4. **Configure environment**
    ```bash
+   # On Windows:
+   copy .env.example .env
+
+   # On Linux/Mac:
    cp .env.example .env
-   # Edit .env file with your configuration
    ```
+   Edit `.env` file if needed (SQLite works out of the box)
 
 5. **Run migrations**
    ```bash
@@ -60,20 +72,23 @@ A comprehensive Django REST API application for managing users with full CRUD op
    python manage.py runserver
    ```
 
-8. **Start Celery** (optional, in separate terminals)
+8. **Start Celery** (optional, requires Redis)
    ```bash
+   # In separate terminals:
    celery -A user_management worker --loglevel=info
    celery -A user_management beat --loglevel=info
    ```
 
 ## Access Points
 
-- **Welcome Page**: http://localhost:8000/
-- **User Management**: http://localhost:8000/users-web/
-- **API Endpoints**: http://localhost:8000/api/users/
-- **Swagger Documentation**: http://localhost:8000/swagger/
-- **ReDoc Documentation**: http://localhost:8000/redoc/
-- **Admin Panel**: http://localhost:8000/admin/
+| Interface | URL | Description |
+|-----------|-----|-------------|
+| Welcome Page | http://localhost:8000/ | Main landing page |
+| User Management | http://localhost:8000/users-web/ | Web UI for CRUD operations |
+| API Endpoints | http://localhost:8000/api/users/ | REST API |
+| Swagger Docs | http://localhost:8000/swagger/ | Interactive API documentation |
+| ReDoc | http://localhost:8000/redoc/ | Alternative API docs |
+| Admin Panel | http://localhost:8000/admin/ | Django admin interface |
 
 ## API Endpoints
 
@@ -89,129 +104,157 @@ A comprehensive Django REST API application for managing users with full CRUD op
 
 ## Database Configuration
 
-The application connects to MySQL database with the following default settings:
+The application supports two database backends:
 
-- **Server**: localhost
-- **Database**: test
-- **Table**: t_users
-- **Username**: t_db_usr27
-- **Password**: b27!dKNm
+### Option 1: SQLite (Default - Recommended for Development)
 
-Configure these in `.env` file for your environment.
+SQLite is the default database and requires **no setup**:
+- No database server installation needed
+- Data stored in `db.sqlite3` file
+- Perfect for development, testing, and learning
+
+```env
+# In .env file (this is the default)
+DB_ENGINE=sqlite
+```
+
+### Option 2: MySQL (Recommended for Production)
+
+For production with MySQL:
+
+**Important:** MySQL 8.0 or later is **required**. Django 4.2 does not support MySQL 5.x.
+
+```env
+# In .env file
+DB_ENGINE=mysql
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+DB_HOST=localhost
+DB_PORT=3306
+```
+
+**MySQL Connection Pooling Settings (in settings.py):**
+- `POOL_SIZE`: 10 connections (base pool size)
+- `MAX_OVERFLOW`: 10 connections (additional when pool exhausted)
+- `RECYCLE`: 86400 seconds (recycle connections after 24 hours)
 
 ## Project Structure
 
 ```
 django/
-├── manage.py                 # Django management script
-├── requirements.txt          # Python dependencies
-├── .env.example             # Environment variables template
-├── README.md                # This file
-├── USER_MANUAL.md           # Detailed user manual
-├── TECHNICAL_DESIGN.md      # Technical design document
-├── user_management/         # Main project directory
+├── manage.py                    # Django management script
+├── requirements.txt             # Python dependencies
+├── .env.example                 # Environment variables template
+├── README.md                    # This file
+├── USER_MANUAL.md               # Detailed user manual
+├── TECHNICAL_DESIGN.md          # Technical design document
+├── DOCKER_DEPLOYMENT_GUIDE.md   # Docker deployment guide
+├── Dockerfile                   # Docker image configuration
+├── docker-compose.yml           # Docker Compose configuration
+├── user_management/             # Main project directory
 │   ├── __init__.py
-│   ├── settings.py          # Django settings
-│   ├── urls.py              # URL configuration
-│   ├── wsgi.py              # WSGI configuration
-│   ├── asgi.py              # ASGI configuration
-│   └── celery.py            # Celery configuration
-├── users/                   # Users app
-│   ├── models.py            # TUser model
-│   ├── views.py             # API views
-│   ├── serializers.py       # DRF serializers
-│   ├── urls.py              # App URLs
-│   ├── admin.py             # Admin configuration
-│   ├── tasks.py             # Celery tasks
-│   └── email_utils.py       # Email utilities
-├── templates/               # HTML templates
-│   ├── welcome.html         # Welcome page
-│   └── users_list.html      # User management page
-├── static/                  # Static files
-├── logs/                    # Application logs
-└── staticfiles/            # Collected static files
+│   ├── settings.py              # Django settings
+│   ├── urls.py                  # URL configuration
+│   ├── wsgi.py                  # WSGI configuration
+│   ├── asgi.py                  # ASGI configuration
+│   └── celery.py                # Celery configuration
+├── users/                       # Users app
+│   ├── models.py                # TUser model
+│   ├── views.py                 # API views
+│   ├── serializers.py           # DRF serializers
+│   ├── urls.py                  # App URLs
+│   ├── admin.py                 # Admin configuration
+│   ├── tasks.py                 # Celery tasks
+│   └── email_utils.py           # Email utilities
+├── templates/                   # HTML templates
+│   ├── welcome.html             # Welcome page
+│   └── users_list.html          # User management page
+├── static/                      # Static files
+├── logs/                        # Application logs (auto-created)
+└── db.sqlite3                   # SQLite database (auto-created)
 ```
 
 ## Technology Stack
 
-- **Backend**: Django 4.2, Django REST Framework 3.14
-- **Language**: Python 3.10
-- **Database**: MySQL with connection pooling
-- **Task Queue**: Celery 5.3 with Redis
-- **Documentation**: drf-yasg (Swagger/OpenAPI)
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-
-## Key Features Explained
-
-### 1. REST API
-Full CRUD operations with RESTful principles, JSON request/response format, and proper HTTP status codes.
-
-### 2. Database Connection Pooling
-Efficient MySQL connection management using `django-db-connection-pool`:
-- Pool size: 10 connections
-- Max overflow: 10 additional connections
-- Connection recycling: 24 hours
-
-### 3. Task Scheduling (Celery)
-Background task processing and scheduled jobs similar to Quartz in Java:
-- Asynchronous email sending
-- Scheduled cleanup tasks
-- Daily report generation
-- Bulk notifications
-
-### 4. Logging System
-Comprehensive logging similar to Log4J2 in Java:
-- Rotating file handlers (10 MB, 10 backups)
-- Separate error logs
-- Configurable log levels
-- Structured log format
-
-### 5. Email Functionality
-SMTP-based email system with:
-- Welcome emails for new users
-- Notification emails
-- Bulk email support
-- HTML email support
-- Configurable SMTP settings
-
-### 6. API Documentation
-Interactive API documentation with:
-- Swagger UI for testing endpoints
-- ReDoc for readable documentation
-- Automatic schema generation
-- Request/response examples
+| Component | Technology |
+|-----------|------------|
+| Backend | Django 4.2, Django REST Framework 3.14 |
+| Language | Python 3.10+ |
+| Database | SQLite (dev) / MySQL 8.0+ (prod) |
+| Task Queue | Celery 5.3 with Redis |
+| Documentation | drf-yasg (Swagger/OpenAPI) |
+| Frontend | HTML5, CSS3, JavaScript (Vanilla) |
+| Containerization | Docker, Docker Compose |
 
 ## Configuration
 
-Edit `.env` file to configure:
+### Minimal Configuration (SQLite)
 
 ```env
-# Django Settings
-SECRET_KEY=your-secret-key
+# .env file - SQLite (default, no database setup needed)
+SECRET_KEY=your-secret-key-change-in-production
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
+DB_ENGINE=sqlite
+```
 
-# Database
-DB_NAME=test
-DB_USER=t_db_usr27
-DB_PASSWORD=b27!dKNm
-DB_HOST=166.62.40.217
+### Full Configuration (MySQL)
+
+```env
+# .env file - MySQL (requires MySQL 8.0+)
+SECRET_KEY=your-secret-key-change-in-production
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
+
+# Database (MySQL 8.0+ required)
+DB_ENGINE=mysql
+DB_NAME=user_management_db
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
 DB_PORT=3306
 
-# Celery (Redis)
+# Celery (requires Redis)
 CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
 
 # Email (SMTP)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
+EMAIL_USE_TLS=True
 EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-password
+EMAIL_HOST_PASSWORD=your-app-password
+DEFAULT_FROM_EMAIL=your-email@gmail.com
+```
+
+## Docker Deployment
+
+For Docker deployment, see the [Docker Deployment Guide](DOCKER_DEPLOYMENT_GUIDE.md).
+
+Quick start with Docker:
+
+```bash
+# Build and start containers
+docker compose up -d --build
+
+# Run migrations
+docker compose exec web python manage.py migrate
+
+# Create superuser (optional)
+docker compose exec web python manage.py createsuperuser
+
+# Access the application
+# http://localhost:8000
 ```
 
 ## Documentation
 
-- **[User Manual](USER_MANUAL.md)** - Complete guide for deploying and using the application
-- **[Technical Design](TECHNICAL_DESIGN.md)** - Detailed technical architecture and design decisions
+| Document | Description |
+|----------|-------------|
+| [User Manual](USER_MANUAL.md) | Complete deployment and usage guide |
+| [Technical Design](TECHNICAL_DESIGN.md) | Architecture and design decisions |
+| [Docker Guide](DOCKER_DEPLOYMENT_GUIDE.md) | Step-by-step Docker deployment |
 
 ## Testing the API
 
@@ -238,7 +281,7 @@ curl -X PUT http://localhost:8000/api/users/1/ \
 curl -X DELETE http://localhost:8000/api/users/1/
 ```
 
-### Using Python requests
+### Using Python
 
 ```python
 import requests
@@ -268,32 +311,32 @@ For production deployment:
 4. Use HTTPS
 5. Implement authentication (JWT, OAuth)
 6. Add rate limiting
-7. Regular security updates
+7. Keep dependencies updated
+8. Never commit `.env` file to version control
 
 ## Troubleshooting
 
-### Database Connection Issues
-- Verify MySQL server is running
-- Check database credentials in `.env`
-- Ensure database and table exist
+### Common Issues
 
-### Celery Not Working
-- Ensure Redis server is running
-- Start Celery worker and beat processes
-- Check Celery logs for errors
+| Issue | Solution |
+|-------|----------|
+| Logs directory error | The app auto-creates `logs/` directory now |
+| MySQL version error | Use MySQL 8.0+ (Django 4.2 requirement) |
+| MySQL not installed | Use SQLite instead: `DB_ENGINE=sqlite` |
+| Celery not working | Ensure Redis is running |
+| Email not sending | Check SMTP settings, use app password for Gmail |
 
-### Email Not Sending
-- Verify SMTP settings in `.env`
-- For Gmail, use app-specific password
-- Check email logs in `logs/django.log`
+### Database-Specific Issues
 
-## Contributing
+**SQLite:**
+- No setup required, works out of the box
+- Database file: `db.sqlite3` in project root
+- Use DB Browser for SQLite to view data
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+**MySQL:**
+- Must be version 8.0 or later
+- Check connection: `mysql -h hostname -u user -p`
+- Verify database exists: `SHOW DATABASES;`
 
 ## License
 
@@ -304,8 +347,4 @@ This project is licensed under the MIT License.
 For issues and questions:
 - Check the [User Manual](USER_MANUAL.md)
 - Review the [Technical Design](TECHNICAL_DESIGN.md)
-- Create an issue in the repository
-
-## Author
-
-Built with Django and Python for comprehensive user management.
+- Check the [Docker Guide](DOCKER_DEPLOYMENT_GUIDE.md)
