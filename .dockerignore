@@ -1,0 +1,105 @@
+# =============================================================================
+# Docker Ignore File
+# =============================================================================
+# Files and directories listed here will NOT be copied into the Docker image
+# This helps reduce image size and prevents sensitive data from being included
+# =============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+
+# Logs (we create fresh logs in container)
+logs/
+*.log
+
+# Documentation (not needed in container)
+*.md
+!requirements.txt
+
+# Docker files (avoid recursive copying)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Local settings
+local_settings.py
+*.local
+
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Static files (will be collected in container)
+staticfiles/
+
+# Media files
+media/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Secrets (IMPORTANT: never include in image)
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+*.pem
+*.key
+
+# Misc
+*.bak
+*.tmp
+*.temp
+Thumbs.db

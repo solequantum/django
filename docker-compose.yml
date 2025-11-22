@@ -1,0 +1,159 @@
+# =============================================================================
+# Docker Compose Configuration for User Management System
+# =============================================================================
+# This file defines all services required to run the application:
+# - web: Django application
+# - db: MySQL database (optional - can use external database)
+# - redis: Redis for Celery message broker
+# - celery_worker: Celery worker for async tasks
+# - celery_beat: Celery beat for scheduled tasks
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # ===========================================================================
+  # Django Web Application
+  # ===========================================================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      # Database settings - using external MySQL server
+      - DB_HOST=${DB_HOST:-166.62.40.217}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-test}
+      - DB_USER=${DB_USER:-t_db_usr27}
+      - DB_PASSWORD=${DB_PASSWORD:-b27!dKNm}
+      # Redis settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      # Email settings
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-}
+    volumes:
+      # Mount logs directory for persistent logging
+      - ./logs:/app/logs
+      # Mount static files for development (optional)
+      - static_volume:/app/staticfiles
+    depends_on:
+      - redis
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===========================================================================
+  # Redis - Message Broker for Celery
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: django_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ===========================================================================
+  # Celery Worker - For Async Task Processing
+  # ===========================================================================
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_celery_worker
+    restart: unless-stopped
+    command: celery -A user_management worker --loglevel=info
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      # Database settings
+      - DB_HOST=${DB_HOST:-166.62.40.217}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-test}
+      - DB_USER=${DB_USER:-t_db_usr27}
+      - DB_PASSWORD=${DB_PASSWORD:-b27!dKNm}
+      # Redis settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      # Email settings
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+      - web
+    networks:
+      - app_network
+
+  # ===========================================================================
+  # Celery Beat - For Scheduled Tasks
+  # ===========================================================================
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_celery_beat
+    restart: unless-stopped
+    command: celery -A user_management beat --loglevel=info
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      # Database settings
+      - DB_HOST=${DB_HOST:-166.62.40.217}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-test}
+      - DB_USER=${DB_USER:-t_db_usr27}
+      - DB_PASSWORD=${DB_PASSWORD:-b27!dKNm}
+      # Redis settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+      - web
+    networks:
+      - app_network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  app_network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  redis_data:
+  static_volume:
