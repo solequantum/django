@@ -13,7 +13,7 @@
 
 ## System Overview
 
-The User Management System is a web-based application that provides RESTful API endpoints for managing user data. The system is built using Django 4.2 framework with Python 3.10 and follows REST architectural principles. It supports dual database backends: SQLite for development and MySQL 8.0+ for production.
+The User Management System is a web-based application that provides RESTful API endpoints for managing user data stored in a MySQL database. The system is built using Django 4.2 framework with Python 3.10 and follows REST architectural principles.
 
 ### Purpose
 To provide a comprehensive user management solution with:
@@ -76,7 +76,7 @@ To provide a comprehensive user management solution with:
 ┌───────────────────────▼─────────────────────────────────────┐
 │                      Data Layer                              │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │SQLite/MySQL │  │    Redis     │  │  File System │       │
+│  │    MySQL    │  │    Redis     │  │  File System │       │
 │  │  (t_users)  │  │  (Celery)    │  │   (Logs)     │       │
 │  └─────────────┘  └──────────────┘  └──────────────┘       │
 └─────────────────────────────────────────────────────────────┘
@@ -102,10 +102,9 @@ For the API, we use **Django REST Framework (DRF)** which adds:
 - **Python 3.10**: Programming language
 
 ### Database
-- **SQLite**: Default database for development (no setup required)
-- **MySQL 8.0+**: Production database (Django 4.2 requires MySQL 8.0 or later)
-- **django-db-connection-pool**: Connection pooling (MySQL only)
-- **mysqlclient**: MySQL database adapter (MySQL only)
+- **MySQL 8.0+**: Primary database (Django 4.2 requires MySQL 8.0 or later)
+- **django-db-connection-pool**: Connection pooling for efficient database operations
+- **mysqlclient**: MySQL database adapter
 
 ### Task Scheduling
 - **Celery 5.3**: Distributed task queue
@@ -126,21 +125,25 @@ For the API, we use **Django REST Framework (DRF)** which adds:
 
 ## Database Design
 
-### Supported Database Backends
+### MySQL Configuration
 
-The application supports two database backends configured via the `DB_ENGINE` environment variable:
+The application uses MySQL database with connection pooling for efficient database operations.
 
-#### 1. SQLite (Default - Development)
-- **Engine**: `django.db.backends.sqlite3`
-- **File**: `db.sqlite3` in project root
-- **Use Case**: Development, testing, learning
-- **Configuration**: `DB_ENGINE=sqlite` (or omit, as it's the default)
+**Requirements:**
+- MySQL Server 8.0 or later (Django 4.2 requirement)
+- mysqlclient Python package
+- django-db-connection-pool package
 
-#### 2. MySQL (Production)
-- **Engine**: `dj_db_conn_pool.backends.mysql` (with connection pooling)
-- **Version Required**: MySQL 8.0 or later
-- **Use Case**: Production deployments with high traffic
-- **Configuration**: `DB_ENGINE=mysql` plus database credentials
+**Default Configuration:**
+- **Server**: 103.191.209.34
+- **Database**: jeetbbha1_test14Db2
+- **Username**: jeetbbha1_USR_testt14Db2
+- **Port**: 3306
+
+**Connection Pool Settings:**
+- **POOL_SIZE**: 10 connections (base pool size)
+- **MAX_OVERFLOW**: 10 connections (additional when pool exhausted)
+- **RECYCLE**: 86400 seconds (recycle connections after 24 hours)
 
 **Important Note**: Django 4.2 requires MySQL 8.0 or later. MySQL 5.x versions are NOT supported and will cause errors.
 

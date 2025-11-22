@@ -12,12 +12,12 @@
 
 ## Introduction
 
-The User Management System is a comprehensive REST API application built with Django 4.2 and Python 3.10. It provides full CRUD (Create, Read, Update, Delete) operations for managing users with support for both SQLite (development) and MySQL (production) databases.
+The User Management System is a comprehensive REST API application built with Django 4.2 and Python 3.10. It provides full CRUD (Create, Read, Update, Delete) operations for managing users in a MySQL database.
 
 ### Key Features:
 - **REST API**: Complete RESTful API for user management
 - **Web Interface**: User-friendly web pages with pagination
-- **Dual Database Support**: SQLite for development, MySQL 8.0+ for production
+- **MySQL Database**: Connection pooling for efficient database operations
 - **API Documentation**: Integrated Swagger/OpenAPI documentation
 - **Task Scheduling**: Celery-based scheduling (similar to Quartz in Java)
 - **Logging**: Advanced logging system (similar to Log4J2 in Java)
@@ -32,11 +32,10 @@ Before installing the application, ensure you have the following:
 ### Required:
 - **Python 3.10** or higher
 - **pip** (Python package manager)
+- **MySQL Server 8.0+** (Django 4.2 requires MySQL 8.0 or later)
 
 ### Optional:
-- **MySQL Server 8.0+** (only if using MySQL instead of SQLite)
-  - **Important**: Django 4.2 requires MySQL 8.0 or later. MySQL 5.x is NOT supported!
-- **Redis Server** (only for Celery task scheduling)
+- **Redis Server** (for Celery task scheduling)
 - **virtualenv** (recommended for creating isolated Python environments)
 
 ## Installation
@@ -83,11 +82,9 @@ cp .env.example .env
 
 ### Step 2: Configure Environment Variables
 
-Edit the `.env` file based on your database choice:
+Edit the `.env` file with your MySQL database settings:
 
-#### Option A: SQLite (Default - Recommended for Development)
-
-SQLite requires **no database setup**. Just use this minimal configuration:
+**Important**: MySQL 8.0 or later is **required**. Django 4.2 does not support MySQL 5.x.
 
 ```env
 # Django Settings
@@ -95,28 +92,11 @@ SECRET_KEY=your-secret-key-here-change-in-production
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# Database - SQLite (default, no setup required)
-DB_ENGINE=sqlite
-```
-
-That's it! SQLite creates the database file automatically.
-
-#### Option B: MySQL (For Production)
-
-**Important**: MySQL 8.0 or later is **required**. Django 4.2 does not support MySQL 5.x.
-
-```env
-# Django Settings
-SECRET_KEY=your-secret-key-here-change-in-production
-DEBUG=False
-ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
-
-# Database - MySQL 8.0+ (uncomment and configure)
-DB_ENGINE=mysql
-DB_NAME=your_database_name
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-DB_HOST=localhost
+# MySQL Database Configuration
+DB_NAME=jeetbbha1_test14Db2
+DB_USER=jeetbbha1_USR_testt14Db2
+DB_PASSWORD=#Rvf$Be365*24
+DB_HOST=103.191.209.34
 DB_PORT=3306
 
 # Celery Configuration (optional, requires Redis)
@@ -134,11 +114,7 @@ DEFAULT_FROM_EMAIL=your-email@gmail.com
 
 ### Step 3: Database Setup
 
-#### For SQLite (Default):
-No setup required! The database file (`db.sqlite3`) is created automatically when you run migrations.
-
-#### For MySQL (Production):
-If using MySQL, ensure the database exists:
+The application connects to the MySQL database specified in the configuration. If you need to create a new database:
 
 ```sql
 -- Connect to MySQL and create the database

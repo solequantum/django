@@ -7,19 +7,10 @@
 # - celery_worker: Celery worker for async tasks
 # - celery_beat: Celery beat for scheduled tasks
 #
-# DATABASE OPTIONS:
-# -----------------
-# The application supports two database backends:
-#
-# 1. SQLite (Default for Docker):
-#    - Set DB_ENGINE=sqlite (or omit it)
-#    - No external database server needed
-#    - Data stored in container volume
-#
-# 2. MySQL (Production):
-#    - Set DB_ENGINE=mysql
-#    - Requires MySQL 8.0 or later
-#    - Configure DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
+# MySQL Database:
+#   The application connects to an external MySQL server.
+#   Configure the MySQL connection settings via environment variables.
+#   MySQL 8.0 or later is required (Django 4.2 requirement).
 # =============================================================================
 
 version: '3.8'
@@ -42,28 +33,16 @@ services:
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
       # =========================================================================
-      # DATABASE CONFIGURATION
+      # MySQL Database Configuration
       # =========================================================================
-      # Option 1: SQLite (Default - no setup required)
-      # Just set DB_ENGINE=sqlite or leave it unset
-      - DB_ENGINE=${DB_ENGINE:-sqlite}
-
-      # Option 2: MySQL (Requires MySQL 8.0+)
-      # Uncomment and configure these for MySQL:
-      # - DB_ENGINE=mysql
-      # - DB_HOST=your_mysql_host
-      # - DB_PORT=3306
-      # - DB_NAME=your_database_name
-      # - DB_USER=your_database_user
-      # - DB_PASSWORD=your_database_password
-      #
-      # MySQL settings (only used if DB_ENGINE=mysql)
-      - DB_HOST=${DB_HOST:-localhost}
+      # MySQL 8.0 or later is required (Django 4.2 requirement)
+      # Configure these settings in your .env file or here
+      # =========================================================================
+      - DB_NAME=${DB_NAME:-jeetbbha1_test14Db2}
+      - DB_USER=${DB_USER:-jeetbbha1_USR_testt14Db2}
+      - DB_PASSWORD=${DB_PASSWORD:-#Rvf$Be365*24}
+      - DB_HOST=${DB_HOST:-103.191.209.34}
       - DB_PORT=${DB_PORT:-3306}
-      - DB_NAME=${DB_NAME:-user_management}
-      - DB_USER=${DB_USER:-db_user}
-      - DB_PASSWORD=${DB_PASSWORD:-db_password}
-      # =========================================================================
 
       # Redis settings (for Celery)
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -81,8 +60,6 @@ services:
       - ./logs:/app/logs
       # Mount static files
       - static_volume:/app/staticfiles
-      # Mount SQLite database for persistence (when using SQLite)
-      - sqlite_data:/app/data
     depends_on:
       - redis
     networks:
@@ -127,13 +104,12 @@ services:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
 
-      # Database settings (same as web service)
-      - DB_ENGINE=${DB_ENGINE:-sqlite}
-      - DB_HOST=${DB_HOST:-localhost}
+      # MySQL Database Configuration
+      - DB_NAME=${DB_NAME:-jeetbbha1_test14Db2}
+      - DB_USER=${DB_USER:-jeetbbha1_USR_testt14Db2}
+      - DB_PASSWORD=${DB_PASSWORD:-#Rvf$Be365*24}
+      - DB_HOST=${DB_HOST:-103.191.209.34}
       - DB_PORT=${DB_PORT:-3306}
-      - DB_NAME=${DB_NAME:-user_management}
-      - DB_USER=${DB_USER:-db_user}
-      - DB_PASSWORD=${DB_PASSWORD:-db_password}
 
       # Redis settings
       - CELERY_BROKER_URL=redis://redis:6379/0
@@ -147,7 +123,6 @@ services:
       - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
     volumes:
       - ./logs:/app/logs
-      - sqlite_data:/app/data
     depends_on:
       - redis
       - web
@@ -168,20 +143,18 @@ services:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
 
-      # Database settings (same as web service)
-      - DB_ENGINE=${DB_ENGINE:-sqlite}
-      - DB_HOST=${DB_HOST:-localhost}
+      # MySQL Database Configuration
+      - DB_NAME=${DB_NAME:-jeetbbha1_test14Db2}
+      - DB_USER=${DB_USER:-jeetbbha1_USR_testt14Db2}
+      - DB_PASSWORD=${DB_PASSWORD:-#Rvf$Be365*24}
+      - DB_HOST=${DB_HOST:-103.191.209.34}
       - DB_PORT=${DB_PORT:-3306}
-      - DB_NAME=${DB_NAME:-user_management}
-      - DB_USER=${DB_USER:-db_user}
-      - DB_PASSWORD=${DB_PASSWORD:-db_password}
 
       # Redis settings
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       - ./logs:/app/logs
-      - sqlite_data:/app/data
     depends_on:
       - redis
       - web
@@ -203,5 +176,3 @@ volumes:
     # Persistent storage for Redis data
   static_volume:
     # Persistent storage for static files
-  sqlite_data:
-    # Persistent storage for SQLite database (when using SQLite)

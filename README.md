@@ -1,11 +1,11 @@
 # User Management System
 
-A comprehensive Django REST API application for managing users with full CRUD operations, built with Python 3.10. Supports both SQLite (development) and MySQL (production) databases.
+A comprehensive Django REST API application for managing users with full CRUD operations, built with Python 3.10 and MySQL database.
 
 ## Features
 
 - **REST API** - Complete RESTful API with CRUD operations
-- **Dual Database Support** - SQLite for development, MySQL for production
+- **MySQL Database** - Efficient connection pooling mechanism
 - **Web Interface** - User-friendly web pages with pagination
 - **API Documentation** - Integrated Swagger/OpenAPI documentation
 - **Task Scheduling** - Celery-based scheduling (like Quartz in Java)
@@ -19,10 +19,8 @@ A comprehensive Django REST API application for managing users with full CRUD op
 ### Prerequisites
 
 - Python 3.10+
-- Redis Server (optional, for Celery task scheduling)
-
-**For MySQL (Production only):**
 - MySQL Server 8.0+ (Django 4.2 requires MySQL 8.0 or later)
+- Redis Server (optional, for Celery task scheduling)
 
 ### Installation
 
@@ -55,7 +53,6 @@ A comprehensive Django REST API application for managing users with full CRUD op
    # On Linux/Mac:
    cp .env.example .env
    ```
-   Edit `.env` file if needed (SQLite works out of the box)
 
 5. **Run migrations**
    ```bash
@@ -104,40 +101,29 @@ A comprehensive Django REST API application for managing users with full CRUD op
 
 ## Database Configuration
 
-The application supports two database backends:
+The application uses MySQL database with connection pooling.
 
-### Option 1: SQLite (Default - Recommended for Development)
+**Default MySQL Configuration:**
+- **Server**: 103.191.209.34
+- **Database**: jeetbbha1_test14Db2
+- **Username**: jeetbbha1_USR_testt14Db2
+- **Port**: 3306
 
-SQLite is the default database and requires **no setup**:
-- No database server installation needed
-- Data stored in `db.sqlite3` file
-- Perfect for development, testing, and learning
-
-```env
-# In .env file (this is the default)
-DB_ENGINE=sqlite
-```
-
-### Option 2: MySQL (Recommended for Production)
-
-For production with MySQL:
-
-**Important:** MySQL 8.0 or later is **required**. Django 4.2 does not support MySQL 5.x.
-
-```env
-# In .env file
-DB_ENGINE=mysql
-DB_NAME=your_database_name
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-DB_HOST=localhost
-DB_PORT=3306
-```
-
-**MySQL Connection Pooling Settings (in settings.py):**
+**Connection Pooling Settings:**
 - `POOL_SIZE`: 10 connections (base pool size)
 - `MAX_OVERFLOW`: 10 connections (additional when pool exhausted)
 - `RECYCLE`: 86400 seconds (recycle connections after 24 hours)
+
+**Important:** MySQL 8.0 or later is **required**. Django 4.2 does not support MySQL 5.x.
+
+Configure database settings in `.env` file:
+```env
+DB_NAME=jeetbbha1_test14Db2
+DB_USER=jeetbbha1_USR_testt14Db2
+DB_PASSWORD=#Rvf$Be365*24
+DB_HOST=103.191.209.34
+DB_PORT=3306
+```
 
 ## Project Structure
 
@@ -171,8 +157,7 @@ django/
 │   ├── welcome.html             # Welcome page
 │   └── users_list.html          # User management page
 ├── static/                      # Static files
-├── logs/                        # Application logs (auto-created)
-└── db.sqlite3                   # SQLite database (auto-created)
+└── logs/                        # Application logs (auto-created)
 ```
 
 ## Technology Stack
@@ -181,7 +166,7 @@ django/
 |-----------|------------|
 | Backend | Django 4.2, Django REST Framework 3.14 |
 | Language | Python 3.10+ |
-| Database | SQLite (dev) / MySQL 8.0+ (prod) |
+| Database | MySQL 8.0+ with connection pooling |
 | Task Queue | Celery 5.3 with Redis |
 | Documentation | drf-yasg (Swagger/OpenAPI) |
 | Frontend | HTML5, CSS3, JavaScript (Vanilla) |
@@ -189,30 +174,19 @@ django/
 
 ## Configuration
 
-### Minimal Configuration (SQLite)
+Edit `.env` file to configure:
 
 ```env
-# .env file - SQLite (default, no database setup needed)
+# Django Settings
 SECRET_KEY=your-secret-key-change-in-production
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
-DB_ENGINE=sqlite
-```
 
-### Full Configuration (MySQL)
-
-```env
-# .env file - MySQL (requires MySQL 8.0+)
-SECRET_KEY=your-secret-key-change-in-production
-DEBUG=False
-ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
-
-# Database (MySQL 8.0+ required)
-DB_ENGINE=mysql
-DB_NAME=user_management_db
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_HOST=localhost
+# MySQL Database
+DB_NAME=jeetbbha1_test14Db2
+DB_USER=jeetbbha1_USR_testt14Db2
+DB_PASSWORD=#Rvf$Be365*24
+DB_HOST=103.191.209.34
 DB_PORT=3306
 
 # Celery (requires Redis)
@@ -281,26 +255,6 @@ curl -X PUT http://localhost:8000/api/users/1/ \
 curl -X DELETE http://localhost:8000/api/users/1/
 ```
 
-### Using Python
-
-```python
-import requests
-
-# List users
-response = requests.get('http://localhost:8000/api/users/')
-print(response.json())
-
-# Create user
-user_data = {
-    'username': 'jane_doe',
-    'email': 'jane@example.com',
-    'first_name': 'Jane',
-    'last_name': 'Doe'
-}
-response = requests.post('http://localhost:8000/api/users/', json=user_data)
-print(response.json())
-```
-
 ## Security Notes
 
 For production deployment:
@@ -320,23 +274,11 @@ For production deployment:
 
 | Issue | Solution |
 |-------|----------|
-| Logs directory error | The app auto-creates `logs/` directory now |
 | MySQL version error | Use MySQL 8.0+ (Django 4.2 requirement) |
-| MySQL not installed | Use SQLite instead: `DB_ENGINE=sqlite` |
+| Connection refused | Verify MySQL server is running and accessible |
+| Access denied | Check database credentials in `.env` |
 | Celery not working | Ensure Redis is running |
 | Email not sending | Check SMTP settings, use app password for Gmail |
-
-### Database-Specific Issues
-
-**SQLite:**
-- No setup required, works out of the box
-- Database file: `db.sqlite3` in project root
-- Use DB Browser for SQLite to view data
-
-**MySQL:**
-- Must be version 8.0 or later
-- Check connection: `mysql -h hostname -u user -p`
-- Verify database exists: `SHOW DATABASES;`
 
 ## License
 
