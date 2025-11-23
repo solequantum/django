@@ -197,4 +197,98 @@ python manage.py shell -c "from django.contrib.auth.models import User; User.obj
 
 ---
 
+## Part 3: Shutdown Hooks & Resource Cleanup
+
+This application includes Java-style shutdown hooks for proper resource cleanup when the server stops.
+
+### How It Works
+
+Similar to Java's `Runtime.addShutdownHook()`, this implementation:
+- Automatically closes database connections in the pool
+- Handles SIGTERM (kill) and SIGINT (Ctrl+C) signals gracefully
+- Allows registering custom cleanup functions
+- Executes hooks in priority order (lower number = earlier execution)
+
+### Automatic Cleanup (Built-in)
+
+When you stop the server (Ctrl+C or kill command), the following happens automatically:
+1. Log shutdown statistics
+2. Close cache connections
+3. Shutdown Celery workers (if running)
+4. Close all database connections
+5. Dispose connection pools
+
+### Registering Custom Shutdown Hooks
+
+You can add your own cleanup logic in `users/shutdown_hooks.py`:
+
+```python
+from users.shutdown_hooks import register_shutdown_hook
+
+# Method 1: Using decorator
+@register_shutdown_hook
+def my_cleanup_function():
+    print("Cleaning up my resources...")
+
+# Method 2: With priority (lower = executes first)
+def cleanup_temp_files():
+    import shutil
+    shutil.rmtree('/tmp/myapp', ignore_errors=True)
+
+register_shutdown_hook(cleanup_temp_files, name="TempFileCleanup", priority=3)
+```
+
+### Adding Hooks in AppConfig
+
+Edit `users/apps.py` to register hooks on app startup:
+
+```python
+def _initialize_shutdown_hooks(self):
+    from .shutdown_hooks import ShutdownHookManager
+
+    manager = ShutdownHookManager()
+
+    # Register your custom hook
+    def my_custom_cleanup():
+        # Your cleanup logic here
+        pass
+
+    manager.register_hook(my_custom_cleanup, "MyCleanup", priority=5)
+```
+
+### Hook Priority Guide
+
+| Priority | Use Case |
+|----------|----------|
+| 1-3 | Logging, statistics |
+| 4-6 | Application resources (cache, temp files) |
+| 7-9 | External services (Celery, message queues) |
+| 10+ | Database connections (handled automatically) |
+
+### Manual Connection Cleanup
+
+If you need to manually close connections:
+
+```python
+from django.db import connections
+
+# Close all connections
+for alias in connections:
+    connections[alias].close()
+```
+
+### Verifying Shutdown Hooks
+
+When you stop the server, you should see logs like:
+```
+INFO SHUTDOWN INITIATED - Executing cleanup hooks...
+INFO Executing hook: LogStatistics
+INFO Executing hook: CacheCleanup
+INFO Closing database connections...
+INFO Closed database connection: default
+INFO SHUTDOWN COMPLETE - All resources released
+```
+
+---
+
 *Last Updated: November 2025*
